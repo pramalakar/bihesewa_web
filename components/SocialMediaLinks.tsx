@@ -14,14 +14,14 @@ export default function SocialMediaLinks({
   const socialLinks = [
     {
       name: 'Facebook',
-      url: 'https://www.facebook.com/bihesewa',
+      url: 'https://www.facebook.com/profile.php?id=100092709636707',
       icon: Facebook,
       color: 'hover:text-[#1877F2]',
       bgColor: 'hover:bg-[#1877F2]/10',
     },
     {
       name: 'Instagram',
-      url: 'https://www.instagram.com/bihesewa',
+      url: 'https://www.instagram.com/bihesewa_official',
       icon: Instagram,
       color: 'hover:text-[#E4405F]',
       bgColor: 'hover:bg-[#E4405F]/10',

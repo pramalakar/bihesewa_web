@@ -58,7 +58,7 @@ export default function ContactPage() {
         </h2>
         <div className="flex flex-wrap gap-3">
           <a
-            href="https://www.facebook.com/bihesewa"
+            href="https://www.facebook.com/profile.php?id=100092709636707"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 text-xs bg-[#1877F2] hover:bg-[#166FE5] text-white rounded transition-colors duration-200"
@@ -68,7 +68,7 @@ export default function ContactPage() {
             <span>Facebook</span>
           </a>
           <a
-            href="https://www.instagram.com/bihesewa"
+            href="https://www.instagram.com/bihesewa_official"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 text-xs bg-gradient-to-r from-[#E4405F] to-[#F77737] hover:from-[#D32A4A] hover:to-[#E66628] text-white rounded transition-colors duration-200"
