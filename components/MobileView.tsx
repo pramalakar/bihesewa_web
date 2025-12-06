@@ -20,7 +20,7 @@ export default function MobileView() {
               </div>
               
               {/* Privacy-focused message */}
-              <div className="space-y-3 animate-fade-in">
+              <div className="space-y-3">
                 <h1 className="text-xl font-playfair font-light text-gray-700 dark:text-gray-300 tracking-tight">
                   Your Privacy, Protected
                 </h1>

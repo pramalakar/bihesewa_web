@@ -78,7 +78,7 @@ export default function ContactPage() {
             <span>Instagram</span>
           </a>
           <a
-            href="https://www.tiktok.com/@bihesewa"
+            href="https://www.tiktok.com/@bihe.sewa2"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-4 py-2 text-xs bg-[#000000] hover:bg-[#1A1A1A] dark:bg-[#FFFFFF] dark:hover:bg-[#F0F0F0] dark:text-[#000000] text-white rounded transition-colors duration-200"

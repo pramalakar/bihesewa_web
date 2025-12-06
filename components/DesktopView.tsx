@@ -144,7 +144,7 @@ export default function DesktopView() {
           </div>
           
           {/* Privacy-focused message */}
-          <div className="space-y-4 animate-fade-in">
+          <div className="space-y-4">
             <h1 className="text-2xl md:text-3xl font-playfair font-light text-gray-700 dark:text-gray-300 tracking-tight">
               Your Privacy, Protected
             </h1>

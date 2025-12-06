@@ -3,177 +3,164 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Shield, 
-  FileText, 
-  Info, 
-  Mail,
-  Menu,
-  X
-} from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import Logo from './Logo';
+import SocialMediaLinks from './SocialMediaLinks';
 
 const navigationItems = [
   {
+    name: 'Home',
+    href: '/',
+  },
+  {
     name: 'Privacy',
     href: '/privacy',
-    icon: Shield,
   },
   {
     name: 'Terms',
     href: '/terms',
-    icon: FileText,
   },
   {
     name: 'About',
     href: '/about',
-    icon: Info,
   },
   {
     name: 'Contact',
     href: '/contact',
-    icon: Mail,
   },
 ];
 
 export default function BottomNavigation() {
   const pathname = usePathname();
-  const [isVisible, setIsVisible] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
 
+  // Prevent body scroll when menu is open
   useEffect(() => {
-    // Show navigation on scroll
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Show if scrolling up or at top
-      if (currentScrollY < lastScrollY || currentScrollY < 10) {
-        setIsVisible(true);
-        setIsOpen(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Hide if scrolling down
-        setIsVisible(false);
-        setIsOpen(false);
-      }
-      
-      setLastScrollY(currentScrollY);
-      
-      // Auto-hide after 3 seconds of no scrolling
-      if (hideTimeout) clearTimeout(hideTimeout);
-      const timeout = setTimeout(() => {
-        setIsVisible(false);
-        setIsOpen(false);
-      }, 3000);
-      setHideTimeout(timeout);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    
-    // Auto-hide after initial 3 seconds
-    const initialTimeout = setTimeout(() => {
-      setIsVisible(false);
-      setIsOpen(false);
-    }, 3000);
-
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (hideTimeout) clearTimeout(hideTimeout);
-      clearTimeout(initialTimeout);
+      document.body.style.overflow = 'unset';
     };
-  }, [lastScrollY, hideTimeout]);
+  }, [isOpen]);
+
+  // Close menu on route change
+  useEffect(() => {
+    setIsOpen(false);
+  }, [pathname]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-    setIsVisible(true);
-    
-    // Auto-hide after 5 seconds when manually opened
-    if (hideTimeout) clearTimeout(hideTimeout);
-    const timeout = setTimeout(() => {
-      setIsOpen(false);
-      setIsVisible(false);
-    }, 5000);
-    setHideTimeout(timeout);
+  };
+
+  const closeMenu = () => {
+    setIsOpen(false);
   };
 
   return (
     <>
-      {/* Toggle Button - Always visible when menu is hidden */}
-      {!isVisible && (
-        <button
-          onClick={toggleMenu}
-          className="fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
-          aria-label="Toggle menu"
-        >
-          <Menu className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-        </button>
-      )}
-
-      {/* Navigation Menu */}
-      <nav 
+      {/* Floating Menu Button - Always visible */}
+      <button
+        onClick={toggleMenu}
         className={`
-          fixed bottom-0 left-0 right-0 
-          bg-white/95 dark:bg-gray-900/95 
-          backdrop-blur-sm
-          z-40
-          transition-transform duration-300 ease-in-out
-          ${isVisible && isOpen ? 'translate-y-0' : 'translate-y-full'}
+          fixed bottom-6 right-6 z-50 
+          bg-white dark:bg-gray-800 
+          border border-gray-200 dark:border-gray-700 
+          rounded-full p-4 
+          shadow-xl hover:shadow-2xl 
+          transition-all duration-300 ease-out
+          ${isOpen ? 'scale-90 rotate-90 opacity-0' : 'scale-100 rotate-0 opacity-100 hover:scale-110 active:scale-95'}
+          cursor-pointer 
+          focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2
         `}
+        aria-label={isOpen ? 'Close menu' : 'Open menu'}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            {/* Close button when open */}
-            {isOpen && (
-              <button
-                onClick={toggleMenu}
-                className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700"
-                aria-label="Close menu"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            )}
+        {isOpen ? (
+          <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        ) : (
+          <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+        )}
+      </button>
+
+      {/* Full-Screen Menu Overlay */}
+      <div
+        className={`
+          fixed inset-0 z-40
+          bg-white dark:bg-gray-900
+          transition-all duration-300 ease-out
+          ${isOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}
+        `}
+        onClick={closeMenu}
+      >
+        {/* Menu Content */}
+        <div 
+          className={`
+            h-full flex flex-col
+            transition-transform duration-300 ease-out
+            ${isOpen ? 'translate-y-0' : 'translate-y-8'}
+          `}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header with Logo and Close Button */}
+          <div className="flex items-center justify-between px-6 pt-8 pb-12">
+            {/* Logo - Top Left */}
+            <div className="flex items-center">
+              <Logo size="md" showText={false} />
+            </div>
             
-            {/* Navigation Items */}
-            <div className="flex items-center justify-center flex-1 gap-4">
+            {/* Close Button - Top Right */}
+            <button
+              onClick={closeMenu}
+              className="p-2 text-gray-900 dark:text-gray-100 hover:opacity-70 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 rounded"
+              aria-label="Close menu"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          {/* Navigation Items - Centered, Text Only */}
+          <nav className="flex-1 flex flex-col items-center justify-center px-6">
+            <div className="space-y-6">
               {navigationItems.map((item) => {
-                const Icon = item.icon;
                 const isActive = pathname === item.href;
                 
                 return (
                   <Link
                     key={item.name}
                     href={item.href}
+                    onClick={closeMenu}
                     className={`
-                      flex flex-col items-center justify-center 
-                      px-4 py-2.5 rounded-lg 
-                      text-xs font-medium 
-                      transition-all duration-200
-                      min-w-[60px]
+                      block
+                      text-center
+                      transition-all duration-200 ease-out
                       ${
                         isActive
-                          ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                          ? 'text-gray-900 dark:text-white font-medium'
+                          : 'text-gray-700 dark:text-gray-300 font-light'
                       }
-                      focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700
+                      hover:opacity-70
+                      focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 rounded
                     `}
-                    onClick={() => {
-                      setIsOpen(false);
-                      setIsVisible(false);
-                    }}
                   >
-                    <Icon 
-                      className={`w-5 h-5 mb-1 transition-transform duration-200 ${
-                        isActive ? 'text-blue-600 dark:text-blue-400 scale-110' : 'group-hover:scale-110'
-                      }`} 
-                    />
-                    <span className="text-[10px] leading-tight">{item.name}</span>
+                    <span className="text-2xl tracking-tight">
+                      {item.name}
+                    </span>
                   </Link>
                 );
               })}
             </div>
+          </nav>
+
+          {/* Footer with Social Media */}
+          <div className="px-6 pb-8 pt-8">
+            <div className="flex items-center justify-center gap-6">
+              <SocialMediaLinks variant="inline" />
+            </div>
           </div>
         </div>
-      </nav>
+      </div>
     </>
   );
 }
