@@ -6,25 +6,28 @@ import BottomNavigation from './BottomNavigation';
 import Link from 'next/link';
 import { Shield, FileText, Info, Mail, Menu } from 'lucide-react';
 import Logo from './Logo';
+import SocialMediaLinks from './SocialMediaLinks';
 
 interface PageLayoutProps {
   children: ReactNode;
   title: string;
   subtitle?: string;
   icon: ReactNode;
+  disableAutoNav?: boolean; // Disable auto show/hide navigation on scroll
 }
 
-export default function PageLayout({ children, title, subtitle, icon }: PageLayoutProps) {
+export default function PageLayout({ children, title, subtitle, icon, disableAutoNav = false }: PageLayoutProps) {
   const { isMobile, isTablet } = useDevice();
   const isMobileDevice = isMobile || isTablet;
-  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [isNavVisible, setIsNavVisible] = useState(disableAutoNav ? false : true); // Start hidden if auto-nav disabled
   const [lastScrollY, setLastScrollY] = useState(0);
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
   // Add/remove blur class when nav is visible (desktop only)
+  // Skip blur if auto-nav is disabled
   useEffect(() => {
-    if (isMobileDevice) return;
+    if (isMobileDevice || disableAutoNav) return;
     
     if (isNavVisible) {
       document.body.classList.add('menu-open');
@@ -34,10 +37,10 @@ export default function PageLayout({ children, title, subtitle, icon }: PageLayo
     return () => {
       document.body.classList.remove('menu-open');
     };
-  }, [isNavVisible, isMobileDevice]);
+  }, [isNavVisible, isMobileDevice, disableAutoNav]);
 
   useEffect(() => {
-    if (isMobileDevice) return; // Only for desktop
+    if (isMobileDevice || disableAutoNav) return; // Only for desktop, and skip if disabled
 
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -107,16 +110,17 @@ export default function PageLayout({ children, title, subtitle, icon }: PageLayo
   // Desktop Layout with Top Navigation
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
-      {/* Full-Screen Trust Content Overlay - Centered in Viewport */}
-      <div
-        className={`
-          fixed inset-0 z-40
-          bg-white/30 dark:bg-gray-900/30
-          backdrop-blur-2xl
-          flex items-center justify-center
-          transition-all duration-300 ease-out
-          ${isNavVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
-        `}
+      {/* Full-Screen Trust Content Overlay - Only show if auto-nav is enabled */}
+      {!disableAutoNav && (
+        <div
+          className={`
+            fixed inset-0 z-40
+            bg-white/30 dark:bg-gray-900/30
+            backdrop-blur-2xl
+            flex items-center justify-center
+            transition-all duration-300 ease-out
+            ${isNavVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
+          `}
         style={{ 
           backdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)',
           WebkitBackdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)'
@@ -159,15 +163,16 @@ export default function PageLayout({ children, title, subtitle, icon }: PageLayo
           </div>
         </div>
       </div>
+      )}
 
-      {/* Desktop Navigation - Auto-hide */}
+      {/* Desktop Navigation - Always visible if auto-nav disabled, otherwise auto-hide */}
       <nav 
         className={`
           fixed top-0 left-0 right-0 z-50
           bg-white/95 dark:bg-gray-900/95 
           backdrop-blur-sm
           transition-transform duration-300 ease-in-out
-          ${isNavVisible ? 'translate-y-0' : '-translate-y-full'}
+          ${disableAutoNav ? 'translate-y-0' : (isNavVisible ? 'translate-y-0' : '-translate-y-full')}
         `}
         onMouseEnter={() => {
           setIsHovered(true);
@@ -218,8 +223,8 @@ export default function PageLayout({ children, title, subtitle, icon }: PageLayo
         </div>
       </nav>
 
-      {/* Show Menu Button when nav is hidden */}
-      {!isNavVisible && (
+      {/* Show Menu Button when nav is hidden (only if auto-nav enabled) */}
+      {!disableAutoNav && !isNavVisible && (
         <button
           onClick={() => {
             setIsNavVisible(true);
@@ -253,12 +258,17 @@ export default function PageLayout({ children, title, subtitle, icon }: PageLayo
         {children}
       </main>
 
-      {/* Footer - Always at bottom */}
-      <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-3 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            © {new Date().getFullYear()} BiheSewa
-          </p>
+      {/* Footer - Enhanced with Social Media (same as landing page) */}
+      <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-4 mt-auto">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-gray-400 dark:text-gray-500 order-2 md:order-1">
+              © {new Date().getFullYear()} BiheSewa. All rights reserved.
+            </p>
+            <div className="order-1 md:order-2">
+              <SocialMediaLinks variant="footer" />
+            </div>
+          </div>
         </div>
       </footer>
     </div>

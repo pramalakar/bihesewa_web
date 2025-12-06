@@ -20,3 +20,4 @@ export default function BrandName({ size = 'md', className = '' }: BrandNameProp
   );
 }
 
+
