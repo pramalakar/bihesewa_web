@@ -47,7 +47,7 @@ export default function Logo({
       className={`flex items-center gap-2 ${className}`}
       aria-label="BiheSewa Home"
     >
-      <div className="relative flex-shrink-0">
+      <div className="relative flex-shrink-0 bg-transparent">
         <Image
           src={logoPath}
           alt="BiheSewa Logo"
@@ -56,6 +56,7 @@ export default function Logo({
           priority
           className="object-contain"
           style={{ width: 'auto', height: 'auto' }}
+          unoptimized={false}
         />
       </div>
       {showText && <BrandName size={size} />}
