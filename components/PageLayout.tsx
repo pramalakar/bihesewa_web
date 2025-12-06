@@ -22,6 +22,20 @@ export default function PageLayout({ children, title, subtitle, icon }: PageLayo
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Add/remove blur class when nav is visible (desktop only)
+  useEffect(() => {
+    if (isMobileDevice) return;
+    
+    if (isNavVisible) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+    return () => {
+      document.body.classList.remove('menu-open');
+    };
+  }, [isNavVisible, isMobileDevice]);
+
   useEffect(() => {
     if (isMobileDevice) return; // Only for desktop
 
@@ -93,6 +107,59 @@ export default function PageLayout({ children, title, subtitle, icon }: PageLayo
   // Desktop Layout with Top Navigation
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
+      {/* Full-Screen Trust Content Overlay - Centered in Viewport */}
+      <div
+        className={`
+          fixed inset-0 z-40
+          bg-white/30 dark:bg-gray-900/30
+          backdrop-blur-2xl
+          flex items-center justify-center
+          transition-all duration-300 ease-out
+          ${isNavVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
+        `}
+        style={{ 
+          backdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)',
+          WebkitBackdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)'
+        }}
+        onMouseEnter={() => {
+          setIsHovered(true);
+          setIsNavVisible(true);
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          const timeout = setTimeout(() => {
+            setIsNavVisible(false);
+          }, 2000);
+          setHideTimeout(timeout);
+        }}
+      >
+        {/* Centered Trust Content */}
+        <div className="text-center max-w-2xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white font-playfair mb-4">
+            Trusted Matrimony Platform
+          </h2>
+          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+            New technology meets traditional values. The largest and most trusted matrimonial platform, connecting hearts with privacy and respect.
+          </p>
+          <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-500 flex-wrap">
+            <span className="flex items-center gap-2">
+              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
+              <span>Privacy First</span>
+            </span>
+            <span className="hidden sm:inline">•</span>
+            <span className="flex items-center gap-2">
+              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
+              <span>Secure Platform</span>
+            </span>
+            <span className="hidden sm:inline">•</span>
+            <span className="flex items-center gap-2">
+              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
+              <span>Trusted by Thousands</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Desktop Navigation - Auto-hide */}
       <nav 
         className={`
