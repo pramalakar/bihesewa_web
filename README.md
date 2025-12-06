@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BiheSewa Web
+
+A privacy-first, minimal website for BiheSewa matrimonial platform.
+
+## Features
+
+- **Privacy-Focused Design**: Minimal, blank-screen landing page emphasizing privacy
+- **Bottom Navigation**: Easy access to Privacy, Terms, About, and Contact pages
+- **Responsive**: Works seamlessly on desktop, tablet, and mobile devices
+- **Dark Mode**: Automatic dark mode support based on system preferences
+- **Modern Stack**: Built with Next.js 16, TypeScript, and Tailwind CSS
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Create a `.env.local` file:
+```bash
+cp .env.example .env.local
+```
+
+3. Update the environment variables in `.env.local` (if needed):
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
+```
+
+### Development
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3001](http://localhost:3001) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Note:** The default Next.js port is 3000, but if you're running on a different port (e.g., 3001), adjust accordingly.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Build
 
-## Learn More
+Build for production:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Start production server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm start
+```
 
-## Deploy on Vercel
+## Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+bihesewa_web/
+├── app/                    # Next.js app directory
+│   ├── page.tsx           # Home page (privacy-focused landing)
+│   ├── privacy/           # Privacy policy page
+│   ├── terms/             # Terms & conditions page
+│   ├── about/             # About us page
+│   ├── contact/           # Contact page
+│   ├── layout.tsx         # Root layout
+│   └── globals.css        # Global styles
+├── components/            # React components
+│   └── BottomNavigation.tsx
+├── src/
+│   ├── config.ts          # Configuration constants
+│   ├── lib/
+│   │   └── api.ts         # API client setup
+│   └── services/
+│       └── cmsService.ts  # CMS service
+└── public/                # Static assets
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Design Philosophy
+
+This website is designed with privacy as the core principle:
+
+- **Minimal Interface**: Clean, blank-screen design that doesn't reveal user information
+- **Privacy Message**: Clear communication that "what you can't see, others can't see either"
+- **Bottom Navigation**: Small, unobtrusive menu for essential information
+- **Trust Building**: Focus on security and privacy features
+
+## API Integration
+
+The website is configured to connect to the existing BiheSewa backend API. Update the `NEXT_PUBLIC_API_BASE_URL` environment variable to point to your API server.
+
+## Technologies
+
+- **Next.js 16**: React framework with App Router
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Utility-first CSS framework
+- **Lucide React**: Icon library
+- **Axios**: HTTP client for API calls
+
+## License
+
+Private - BiheSewa Platform
