@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
-import Logo from './Logo';
 import SocialMediaLinks from './SocialMediaLinks';
 
 const navigationItems = [
@@ -107,13 +106,8 @@ export default function BottomNavigation() {
           `}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header with Logo and Close Button */}
-          <div className="flex items-center justify-between px-6 pt-6 pb-4">
-            {/* Logo - Top Left */}
-            <div className="flex items-center">
-              <Logo size="md" showText={false} />
-            </div>
-            
+          {/* Header with Close Button */}
+          <div className="flex items-center justify-end px-6 pt-6 pb-4">
             {/* Close Button - Top Right */}
             <button
               onClick={closeMenu}

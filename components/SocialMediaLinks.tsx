@@ -1,6 +1,7 @@
 'use client';
 
 import { Facebook, Instagram, MessageCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 interface SocialMediaLinksProps {
   variant?: 'footer' | 'floating' | 'inline';
@@ -11,13 +12,30 @@ export default function SocialMediaLinks({
   variant = 'footer',
   className = '' 
 }: SocialMediaLinksProps) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    };
+    checkMobile();
+  }, []);
+
+  const handleFacebookClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    // On mobile, the mobile URL will automatically open in Facebook app if installed
+    // Otherwise it will open in mobile browser
+    // No need to prevent default - let the mobile URL handle it
+  };
+
   const socialLinks = [
     {
       name: 'Facebook',
       url: 'https://www.facebook.com/profile.php?id=100092709636707',
+      mobileUrl: 'https://m.facebook.com/profile.php?id=100092709636707',
       icon: Facebook,
       color: 'hover:text-[#1877F2]',
       bgColor: 'hover:bg-[#1877F2]/10',
+      onClick: handleFacebookClick,
     },
     {
       name: 'Instagram',
@@ -51,12 +69,14 @@ export default function SocialMediaLinks({
       <div className={`fixed bottom-24 right-4 md:bottom-24 md:right-6 z-40 flex flex-col gap-3 ${className}`}>
         {socialLinks.map((social) => {
           const Icon = social.icon;
+          const href = isMobile && social.mobileUrl ? social.mobileUrl : social.url;
           return (
             <a
               key={social.name}
-              href={social.url}
+              href={href}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={social.onClick || undefined}
               className={`
                 flex items-center justify-center
                 w-12 h-12 md:w-14 md:h-14
@@ -85,12 +105,14 @@ export default function SocialMediaLinks({
       <div className={`flex items-center gap-4 ${className}`}>
         {socialLinks.map((social) => {
           const Icon = social.icon;
+          const href = isMobile && social.mobileUrl ? social.mobileUrl : social.url;
           return (
             <a
               key={social.name}
-              href={social.url}
+              href={href}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={social.onClick || undefined}
               className={`
                 flex items-center justify-center
                 w-10 h-10
@@ -115,12 +137,14 @@ export default function SocialMediaLinks({
     <div className={`flex items-center justify-center gap-4 ${className}`}>
       {socialLinks.map((social) => {
         const Icon = social.icon;
+        const href = isMobile && social.mobileUrl ? social.mobileUrl : social.url;
         return (
           <a
             key={social.name}
-            href={social.url}
+            href={href}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={social.onClick}
             className={`
               flex items-center justify-center
               w-8 h-8

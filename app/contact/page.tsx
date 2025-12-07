@@ -2,8 +2,22 @@
 
 import PageLayout from '@/components/PageLayout';
 import { Mail, MessageCircle, Facebook, Instagram } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 export default function ContactPage() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    };
+    checkMobile();
+  }, []);
+
+  const facebookUrl = isMobile 
+    ? 'https://m.facebook.com/profile.php?id=100092709636707'
+    : 'https://www.facebook.com/profile.php?id=100092709636707';
+
   return (
     <PageLayout
       title="Contact Us"
@@ -58,7 +72,7 @@ export default function ContactPage() {
         </h2>
         <div className="flex flex-wrap gap-3">
           <a
-            href="https://www.facebook.com/profile.php?id=100092709636707"
+            href={facebookUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-5 py-2.5 md:px-4 md:py-2 text-sm md:text-xs bg-[#1877F2] hover:bg-[#166FE5] text-white rounded transition-colors duration-200"

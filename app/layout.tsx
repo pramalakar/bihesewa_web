@@ -15,6 +15,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://bihesewa.com'),
   title: "BiheSewa - Privacy-First Matrimonial Platform",
   description: "Your privacy matters. A secure and private platform for meaningful connections.",
   keywords: ["matrimonial", "marriage", "privacy", "secure", "bihesewa"],
