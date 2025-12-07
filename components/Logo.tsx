@@ -24,15 +24,15 @@ export default function Logo({
   const getSize = () => {
     if (isMobile) {
       switch (size) {
-        case 'sm': return { width: 24, height: 30 };
-        case 'lg': return { width: 40, height: 50 };
-        default: return { width: 32, height: 40 };
+        case 'sm': return { width: 28, height: 35 };
+        case 'lg': return { width: 56, height: 70 };
+        default: return { width: 36, height: 45 };
       }
     } else {
       switch (size) {
-        case 'sm': return { width: 32, height: 40 };
-        case 'lg': return { width: 60, height: 75 };
-        default: return { width: 48, height: 60 };
+        case 'sm': return { width: 36, height: 45 };
+        case 'lg': return { width: 80, height: 100 };
+        default: return { width: 40, height: 50 };
       }
     }
   };

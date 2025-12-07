@@ -158,10 +158,17 @@ button, a, input, textarea, select {
   animation: fade-out-gentle 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Prevent body scroll when menu is open */
-body.menu-open {
-  overflow: hidden;
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
-/* Blur is handled by backdrop-filter on the overlay itself */
-/* No need to blur page content - backdrop-filter will blur what's behind the overlay */
+.animate-gradient {
+  animation: gradient 8s ease infinite;
+}
+
+/* Menu blur and scroll blocking removed */

@@ -2,27 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Shield, FileText, Info, Mail, Menu } from 'lucide-react';
+import { Shield, FileText, Info, Mail, Menu, Lock, EyeOff, CheckCircle2, Building2, Globe, Users, MessageCircle, Send, AlertCircle } from 'lucide-react';
 import Logo from './Logo';
 import SocialMediaLinks from './SocialMediaLinks';
+
+type HoveredMenu = 'privacy' | 'terms' | 'about' | 'contact' | null;
 
 export default function DesktopView() {
   const [isNavVisible, setIsNavVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState<HoveredMenu>(null);
 
-  // Add/remove blur class when nav is visible
-  useEffect(() => {
-    if (isNavVisible) {
-      document.body.classList.add('menu-open');
-    } else {
-      document.body.classList.remove('menu-open');
-    }
-    return () => {
-      document.body.classList.remove('menu-open');
-    };
-  }, [isNavVisible]);
+  // No longer adding blur class
 
   useEffect(() => {
     
@@ -69,7 +62,7 @@ export default function DesktopView() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
-      {/* Full-Screen Trust Content Overlay - Centered in Viewport */}
+      {/* Full-Screen Menu Hover Content Overlay */}
       <div
         className={`
           fixed inset-0 z-40
@@ -77,49 +70,124 @@ export default function DesktopView() {
           backdrop-blur-2xl
           flex items-center justify-center
           transition-all duration-300 ease-out
-          ${isNavVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
+          ${isHovered && hoveredMenu ? 'opacity-100 visible' : 'opacity-0 invisible'}
         `}
         style={{ 
-          backdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)',
-          WebkitBackdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)'
-        }}
-        onMouseEnter={() => {
-          setIsHovered(true);
-          setIsNavVisible(true);
-        }}
-        onMouseLeave={() => {
-          setIsHovered(false);
-          const timeout = setTimeout(() => {
-            setIsNavVisible(false);
-          }, 2000);
-          setHideTimeout(timeout);
+          backdropFilter: isHovered && hoveredMenu ? 'blur(20px)' : 'blur(0px)',
+          WebkitBackdropFilter: isHovered && hoveredMenu ? 'blur(20px)' : 'blur(0px)'
         }}
       >
-        {/* Centered Trust Content */}
-        <div className="text-center max-w-2xl mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white font-playfair mb-4">
-            Trusted Matrimony Platform
-          </h2>
-          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-            New technology meets traditional values. The largest and most trusted matrimonial platform, connecting hearts with privacy and respect.
-          </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-500 flex-wrap">
-            <span className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
-              <span>Privacy First</span>
-            </span>
-            <span className="hidden sm:inline">•</span>
-            <span className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
-              <span>Secure Platform</span>
-            </span>
-            <span className="hidden sm:inline">•</span>
-            <span className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
-              <span>Trusted by Thousands</span>
-            </span>
+        {/* Privacy Menu Content */}
+        {hoveredMenu === 'privacy' && (
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="flex flex-col items-center">
+                <Lock className="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Secure Platform</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  Industry-standard encryption protects your data
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <EyeOff className="w-12 h-12 text-purple-600 dark:text-purple-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Never Public</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  Your profile is never made public or visible to unauthorized users
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Your Rights</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  Full control over your data and profile visibility
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Terms Menu Content */}
+        {hoveredMenu === 'terms' && (
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <div className="grid md:grid-cols-2 gap-12">
+              <div className="flex flex-col items-center">
+                <CheckCircle2 className="w-12 h-12 text-orange-600 dark:text-orange-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">User Responsibilities</h3>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2 text-center">
+                  <li>Provide accurate information</li>
+                  <li>Respect other users</li>
+                  <li>Use platform lawfully</li>
+                </ul>
+              </div>
+              <div className="flex flex-col items-center">
+                <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Prohibited Activities</h3>
+                <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2 text-center">
+                  <li>No false information</li>
+                  <li>No harassment</li>
+                  <li>No illegal activities</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* About Menu Content */}
+        {hoveredMenu === 'about' && (
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="flex flex-col items-center">
+                <Building2 className="w-12 h-12 text-green-600 dark:text-green-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Registered Company</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  Legally registered in Nepal and Australia
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <Globe className="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">For Nepalese Worldwide</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  Connecting hearts across borders
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <Users className="w-12 h-12 text-purple-600 dark:text-purple-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Company-Managed Matching</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                  Professional and respectful matching service
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Contact Menu Content */}
+        {hoveredMenu === 'contact' && (
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <div className="grid md:grid-cols-2 gap-12">
+              <div className="flex flex-col items-center">
+                <Mail className="w-12 h-12 text-indigo-600 dark:text-indigo-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Email Support</h3>
+                <p className="text-base text-gray-700 dark:text-gray-300 mb-1">
+                  support@bihesewa.com
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-500">
+                  Response within 24 hours
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <MessageCircle className="w-12 h-12 text-green-600 dark:text-green-400 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">WhatsApp</h3>
+                <p className="text-base text-gray-700 dark:text-gray-300 mb-1">
+                  +61 467 877 926
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-500">
+                  Quick support available
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Desktop Navigation - Auto-hide */}
@@ -137,6 +205,7 @@ export default function DesktopView() {
         }}
         onMouseLeave={() => {
           setIsHovered(false);
+          setHoveredMenu(null);
           // Hide after leaving hover area
           const timeout = setTimeout(() => {
             setIsNavVisible(false);
@@ -151,6 +220,8 @@ export default function DesktopView() {
               <Link 
                 href="/privacy" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('privacy')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <Shield className="w-4 h-4" />
                 Privacy
@@ -158,6 +229,8 @@ export default function DesktopView() {
               <Link 
                 href="/terms" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('terms')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <FileText className="w-4 h-4" />
                 Terms
@@ -165,6 +238,8 @@ export default function DesktopView() {
               <Link 
                 href="/about" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('about')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <Info className="w-4 h-4" />
                 About
@@ -172,6 +247,8 @@ export default function DesktopView() {
               <Link 
                 href="/contact" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('contact')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <Mail className="w-4 h-4" />
                 Contact
@@ -210,10 +287,12 @@ export default function DesktopView() {
           
           {/* Privacy-focused message */}
           <div className="space-y-4">
-            <h1 className="text-2xl md:text-3xl font-playfair font-light text-gray-700 dark:text-gray-300 tracking-tight">
-              Your Privacy, Protected
+            <h1 className="text-2xl md:text-3xl font-playfair font-light tracking-tight max-w-2xl mx-auto">
+              <span className="bg-gradient-to-r from-amber-400 via-pink-400 to-rose-300 dark:from-amber-300 dark:via-pink-300 dark:to-rose-200 bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+                Your Privacy, Protected
+              </span>
             </h1>
-            <p className="text-sm md:text-base text-gray-500 dark:text-gray-400 font-light leading-relaxed max-w-md mx-auto">
+            <p className="text-sm md:text-base text-gray-400 dark:text-gray-500 font-medium leading-relaxed max-w-md mx-auto">
               You can't view others' profiles here, so others can't view yours too. Your privacy is mutual and respected.
             </p>
           </div>

@@ -4,7 +4,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { useDevice } from '@/src/hooks/useDevice';
 import BottomNavigation from './BottomNavigation';
 import Link from 'next/link';
-import { Shield, FileText, Info, Mail, Menu } from 'lucide-react';
+import { Shield, FileText, Info, Mail, Menu, Lock, EyeOff, CheckCircle2, Building2, Globe, Users, MessageCircle, AlertCircle } from 'lucide-react';
 import Logo from './Logo';
 import SocialMediaLinks from './SocialMediaLinks';
 
@@ -16,6 +16,8 @@ interface PageLayoutProps {
   disableAutoNav?: boolean; // Disable auto show/hide navigation on scroll
 }
 
+type HoveredMenu = 'privacy' | 'terms' | 'about' | 'contact' | null;
+
 export default function PageLayout({ children, title, subtitle, icon, disableAutoNav = false }: PageLayoutProps) {
   const { isMobile, isTablet } = useDevice();
   const isMobileDevice = isMobile || isTablet;
@@ -23,21 +25,9 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
   const [lastScrollY, setLastScrollY] = useState(0);
   const [hideTimeout, setHideTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState<HoveredMenu>(null);
 
-  // Add/remove blur class when nav is visible (desktop only)
-  // Skip blur if auto-nav is disabled
-  useEffect(() => {
-    if (isMobileDevice || disableAutoNav) return;
-    
-    if (isNavVisible) {
-      document.body.classList.add('menu-open');
-    } else {
-      document.body.classList.remove('menu-open');
-    }
-    return () => {
-      document.body.classList.remove('menu-open');
-    };
-  }, [isNavVisible, isMobileDevice, disableAutoNav]);
+  // No longer adding blur class
 
   useEffect(() => {
     if (isMobileDevice || disableAutoNav) return; // Only for desktop, and skip if disabled
@@ -82,22 +72,24 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
   if (isMobileDevice) {
     // Mobile Layout with Bottom Navigation
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
-        <main className="flex-grow max-w-4xl mx-auto px-4 py-8 pb-32 w-full">
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col relative z-0">
+        <main className="flex-grow max-w-4xl mx-auto px-6 py-6 pb-32 w-full relative z-0">
           {/* Header */}
-          <div className="flex items-center gap-2 mb-4">
-            <div className="p-1.5">
-              {icon}
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {title}
-              </h1>
-              {subtitle && (
-                <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                  {subtitle}
-                </p>
-              )}
+          <div className="mb-8 pb-6 border-b-2 border-gray-200 dark:border-gray-700 relative z-0">
+            <div className="flex flex-col items-center text-center gap-3 mb-3">
+              <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-xl">
+                {icon}
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+                  {title}
+                </h1>
+                {subtitle && (
+                  <p className="text-base text-gray-600 dark:text-gray-400 mt-2 font-medium">
+                    {subtitle}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           {children}
@@ -110,7 +102,7 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
   // Desktop Layout with Top Navigation
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
-      {/* Full-Screen Trust Content Overlay - Only show if auto-nav is enabled */}
+      {/* Full-Screen Menu Hover Content Overlay */}
       {!disableAutoNav && (
         <div
           className={`
@@ -119,50 +111,125 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
             backdrop-blur-2xl
             flex items-center justify-center
             transition-all duration-300 ease-out
-            ${isNavVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
+            ${isHovered && hoveredMenu ? 'opacity-100 visible' : 'opacity-0 invisible'}
           `}
-        style={{ 
-          backdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)',
-          WebkitBackdropFilter: isNavVisible ? 'blur(20px)' : 'blur(0px)'
-        }}
-        onMouseEnter={() => {
-          setIsHovered(true);
-          setIsNavVisible(true);
-        }}
-        onMouseLeave={() => {
-          setIsHovered(false);
-          const timeout = setTimeout(() => {
-            setIsNavVisible(false);
-          }, 2000);
-          setHideTimeout(timeout);
-        }}
-      >
-        {/* Centered Trust Content */}
-        <div className="text-center max-w-2xl mx-auto px-6">
-          <h2 className="text-3xl md:text-4xl font-semibold text-gray-900 dark:text-white font-playfair mb-4">
-            Trusted Matrimony Platform
-          </h2>
-          <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
-            New technology meets traditional values. The largest and most trusted matrimonial platform, connecting hearts with privacy and respect.
-          </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-500 flex-wrap">
-            <span className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
-              <span>Privacy First</span>
-            </span>
-            <span className="hidden sm:inline">•</span>
-            <span className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
-              <span>Secure Platform</span>
-            </span>
-            <span className="hidden sm:inline">•</span>
-            <span className="flex items-center gap-2">
-              <span className="text-green-600 dark:text-green-400 text-lg">✓</span>
-              <span>Trusted by Thousands</span>
-            </span>
-          </div>
+          style={{ 
+            backdropFilter: isHovered && hoveredMenu ? 'blur(20px)' : 'blur(0px)',
+            WebkitBackdropFilter: isHovered && hoveredMenu ? 'blur(20px)' : 'blur(0px)'
+          }}
+        >
+          {/* Privacy Menu Content */}
+          {hoveredMenu === 'privacy' && (
+            <div className="max-w-4xl mx-auto px-6 text-center">
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="flex flex-col items-center">
+                  <Lock className="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Secure Platform</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Industry-standard encryption protects your data
+                  </p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <EyeOff className="w-12 h-12 text-purple-600 dark:text-purple-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Never Public</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Your profile is never made public or visible to unauthorized users
+                  </p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Your Rights</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Full control over your data and profile visibility
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Terms Menu Content */}
+          {hoveredMenu === 'terms' && (
+            <div className="max-w-4xl mx-auto px-6 text-center">
+              <div className="grid md:grid-cols-2 gap-12">
+                <div className="flex flex-col items-center">
+                  <CheckCircle2 className="w-12 h-12 text-orange-600 dark:text-orange-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">User Responsibilities</h3>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2 text-center">
+                    <li>Provide accurate information</li>
+                    <li>Respect other users</li>
+                    <li>Use platform lawfully</li>
+                  </ul>
+                </div>
+                <div className="flex flex-col items-center">
+                  <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Prohibited Activities</h3>
+                  <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2 text-center">
+                    <li>No false information</li>
+                    <li>No harassment</li>
+                    <li>No illegal activities</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* About Menu Content */}
+          {hoveredMenu === 'about' && (
+            <div className="max-w-4xl mx-auto px-6 text-center">
+              <div className="grid md:grid-cols-3 gap-8">
+                <div className="flex flex-col items-center">
+                  <Building2 className="w-12 h-12 text-green-600 dark:text-green-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Registered Company</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Legally registered in Nepal and Australia
+                  </p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <Globe className="w-12 h-12 text-blue-600 dark:text-blue-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">For Nepalese Worldwide</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Connecting hearts across borders
+                  </p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <Users className="w-12 h-12 text-purple-600 dark:text-purple-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Company-Managed Matching</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                    Professional and respectful matching service
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Contact Menu Content */}
+          {hoveredMenu === 'contact' && (
+            <div className="max-w-4xl mx-auto px-6 text-center">
+              <div className="grid md:grid-cols-2 gap-12">
+                <div className="flex flex-col items-center">
+                  <Mail className="w-12 h-12 text-indigo-600 dark:text-indigo-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Email Support</h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300 mb-1">
+                    support@bihesewa.com
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    Response within 24 hours
+                  </p>
+                </div>
+                <div className="flex flex-col items-center">
+                  <MessageCircle className="w-12 h-12 text-green-600 dark:text-green-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">WhatsApp</h3>
+                  <p className="text-base text-gray-700 dark:text-gray-300 mb-1">
+                    +61 467 877 926
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-500">
+                    Quick support available
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
       )}
 
       {/* Desktop Navigation - Always visible if auto-nav disabled, otherwise auto-hide */}
@@ -180,6 +247,7 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
         }}
         onMouseLeave={() => {
           setIsHovered(false);
+          setHoveredMenu(null);
           const timeout = setTimeout(() => {
             setIsNavVisible(false);
           }, 2000);
@@ -193,6 +261,8 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
               <Link 
                 href="/privacy" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('privacy')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <Shield className="w-4 h-4" />
                 Privacy
@@ -200,6 +270,8 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
               <Link 
                 href="/terms" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('terms')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <FileText className="w-4 h-4" />
                 Terms
@@ -207,6 +279,8 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
               <Link 
                 href="/about" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('about')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <Info className="w-4 h-4" />
                 About
@@ -214,6 +288,8 @@ export default function PageLayout({ children, title, subtitle, icon, disableAut
               <Link 
                 href="/contact" 
                 className="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-200 flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-700 focus:ring-offset-2"
+                onMouseEnter={() => setHoveredMenu('contact')}
+                onMouseLeave={() => setHoveredMenu(null)}
               >
                 <Mail className="w-4 h-4" />
                 Contact
