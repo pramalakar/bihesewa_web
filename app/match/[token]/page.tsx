@@ -4,7 +4,35 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import PageLayout from '@/components/PageLayout';
 import { User, Calendar, MapPin, Briefcase, GraduationCap, Heart, AlertCircle, Users, Baby, Scale, Languages, Star, Moon, Info, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { API_URL } from '@/src/config';
+import { API_URL, API_BASE_URL } from '@/src/config';
+
+// Helper function to construct full photo URL
+const getPhotoUrl = (photo: string | { thumbnail?: string; fullSize?: string } | null | undefined, preferFullSize: boolean = false): string | null => {
+  if (!photo) return null;
+  
+  let url: string | null = null;
+  
+  if (typeof photo === 'string') {
+    url = photo;
+  } else if (photo && typeof photo === 'object') {
+    url = preferFullSize ? (photo.fullSize || photo.thumbnail) : (photo.thumbnail || photo.fullSize);
+  }
+  
+  if (!url) return null;
+  
+  // If URL is already absolute (starts with http:// or https://), return as is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // If URL starts with /, it's a relative path from the API base
+  if (url.startsWith('/')) {
+    return `${API_BASE_URL}${url}`;
+  }
+  
+  // Otherwise, assume it's a relative path and construct full URL
+  return `${API_BASE_URL}/${url}`;
+};
 
 interface ProfileData {
   // Basic Information
@@ -294,9 +322,9 @@ export default function MatchProfilePage() {
   // Create overlapping profile photos component
   const ProfilePhotosIcon = () => {
     const matchedPhoto = profile.photos && profile.photos.length > 0 
-      ? (typeof profile.photos[0] === 'string' ? profile.photos[0] : profile.photos[0].thumbnail || profile.photos[0].fullSize)
+      ? getPhotoUrl(profile.photos[0], false)
       : null;
-    const userPhoto = profile.user_photo?.thumbnail || profile.user_photo?.fullSize || null;
+    const userPhoto = getPhotoUrl(profile.user_photo, false);
     
     // Debug logging
     console.log('[ProfilePhotosIcon] Photo data:', {
@@ -367,8 +395,8 @@ export default function MatchProfilePage() {
             <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Photos</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {profile.photos.map((photo: string | { thumbnail?: string; fullSize?: string }, index: number) => {
-                // Handle both old format (string) and new format (object)
-                const thumbnailUrl = typeof photo === 'string' ? photo : photo.thumbnail || photo.fullSize;
+                // Get thumbnail URL for grid display
+                const thumbnailUrl = getPhotoUrl(photo, false);
                 if (!thumbnailUrl) return null;
                 
                 return (
@@ -381,8 +409,17 @@ export default function MatchProfilePage() {
                       src={thumbnailUrl}
                       alt={`${profile.name} - Photo ${index + 1}`}
                       className="w-full h-full object-cover"
+                      loading="lazy"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/logo.png';
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent && !parent.querySelector('.photo-placeholder')) {
+                          const placeholder = document.createElement('div');
+                          placeholder.className = 'photo-placeholder w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center';
+                          placeholder.innerHTML = `<div class="text-gray-400 dark:text-gray-500 text-xs text-center px-2">Photo unavailable</div>`;
+                          parent.appendChild(placeholder);
+                        }
                       }}
                     />
                   </div>
@@ -435,10 +472,16 @@ export default function MatchProfilePage() {
             >
               {(() => {
                 const currentPhoto = profile.photos[selectedPhotoIndex];
-                // Use full-size image if available, otherwise fallback to thumbnail or string URL
-                const photoUrl = typeof currentPhoto === 'string' 
-                  ? currentPhoto 
-                  : (currentPhoto.fullSize || currentPhoto.thumbnail);
+                // Use full-size image for viewer
+                const photoUrl = getPhotoUrl(currentPhoto, true);
+                
+                if (!photoUrl) {
+                  return (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+                      <div className="text-gray-400 dark:text-gray-500 text-sm">Photo unavailable</div>
+                    </div>
+                  );
+                }
                 
                 return (
                   <img
@@ -452,8 +495,17 @@ export default function MatchProfilePage() {
                       height: 'auto'
                     }}
                     draggable={false}
+                    loading="eager"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/logo.png';
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent && !parent.querySelector('.photo-placeholder')) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'photo-placeholder w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center';
+                        placeholder.innerHTML = `<div class="text-gray-400 dark:text-gray-500 text-sm">Photo unavailable</div>`;
+                        parent.appendChild(placeholder);
+                      }
                     }}
                   />
                 );
@@ -493,9 +545,10 @@ export default function MatchProfilePage() {
                 onClick={() => setSelectedPhotoIndex(0)}
               >
                 <img
-                  src={typeof profile.photos[0] === 'string' ? profile.photos[0] : profile.photos[0].thumbnail || profile.photos[0].fullSize}
+                  src={getPhotoUrl(profile.photos[0], false) || ''}
                   alt={profile.name}
                   className="w-full h-full object-cover"
+                  loading="eager"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';

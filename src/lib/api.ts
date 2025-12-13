@@ -1,9 +1,10 @@
 import axios from 'axios';
-import { API_URL } from '@/src/config';
+import { API_BASE_URL } from '@/src/config';
 
 // Create axios instance with default config
+// Match mobile app pattern: baseURL is API_BASE_URL, endpoints include /api
 const apiClient = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
