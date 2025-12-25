@@ -90,12 +90,66 @@ git push -u origin "$RELEASE_BRANCH"
 echo ""
 echo "✅ Release branch created successfully!"
 echo ""
+
+# Ask if user wants to build and test
+read -p "Do you want to build and test the release now? (y/n) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo ""
+    echo "🔨 Building production version..."
+    
+    # Check if Node.js is available
+    if ! command -v node &> /dev/null; then
+        echo "⚠️  Warning: Node.js is not installed. Skipping build."
+    elif ! command -v npm &> /dev/null; then
+        echo "⚠️  Warning: npm is not installed. Skipping build."
+    else
+        # Install dependencies if needed
+        if [ ! -d "node_modules" ]; then
+            echo "📦 Installing dependencies..."
+            npm install
+        fi
+        
+        # Build
+        echo "🔨 Running production build..."
+        if npm run build; then
+            echo ""
+            echo "✅ Build completed successfully!"
+            echo ""
+            echo "🧪 To test the build:"
+            echo "   npm start"
+            echo "   Then open: http://localhost:3000"
+            echo ""
+            read -p "Start the production server now? (y/n) " -n 1 -r
+            echo
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo ""
+                echo "🚀 Starting production server..."
+                echo "   Open http://localhost:3000 in your browser"
+                echo "   Press Ctrl+C to stop the server"
+                echo ""
+                npm start
+            fi
+        else
+            echo ""
+            echo "❌ Build failed! Please check the errors above."
+        fi
+    fi
+fi
+
+echo ""
 echo "📋 Next steps:"
 echo "1. Test the release branch thoroughly"
-echo "2. Build and test: npm run build"
-echo "3. Make any final bug fixes if needed"
-echo "4. Create a Pull Request: $RELEASE_BRANCH → $TARGET_BRANCH"
-echo "5. After PR approval and merge:"
+if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    echo "2. Build and test: npm run build"
+    echo "3. Start server: npm start"
+    echo "4. Make any final bug fixes if needed"
+    echo "5. Create a Pull Request: $RELEASE_BRANCH → $TARGET_BRANCH"
+else
+    echo "2. Make any final bug fixes if needed"
+    echo "3. Create a Pull Request: $RELEASE_BRANCH → $TARGET_BRANCH"
+fi
+echo "4. After PR approval and merge:"
 echo "   - Tag the release: git checkout $TARGET_BRANCH && git tag -a $TAG -m 'Release $TAG'"
 echo "   - Push tag: git push origin $TAG"
 if [ "$SOURCE_BRANCH" != "$TARGET_BRANCH" ]; then
