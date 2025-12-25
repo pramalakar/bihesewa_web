@@ -10,7 +10,7 @@ import { API_URL, API_BASE_URL } from '@/src/config';
 const getPhotoUrl = (photo: string | { thumbnail?: string; fullSize?: string } | null | undefined, preferFullSize: boolean = false): string | null => {
   if (!photo) return null;
   
-  let url: string | null = null;
+  let url: string | null | undefined = null;
   
   if (typeof photo === 'string') {
     url = photo;
@@ -139,7 +139,7 @@ interface ProfileData {
 export default function MatchProfilePage() {
   const params = useParams();
   const router = useRouter();
-  const token = params.token as string;
+  const token = (params.token as string) || null;
   
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -182,6 +182,12 @@ export default function MatchProfilePage() {
 
         const data = await response.json();
         const profileData = data.profile || data;
+        
+        // Restrict photos to only photo1-photo4 (photo5-photo8 are private and should never be shown)
+        if (profileData.photos && Array.isArray(profileData.photos)) {
+          profileData.photos = profileData.photos.slice(0, 4);
+        }
+        
         console.log('[MatchProfilePage] Profile data received:', {
           hasProfile: !!profileData,
           hasUserPhoto: !!profileData.user_photo,
