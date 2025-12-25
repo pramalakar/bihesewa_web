@@ -154,6 +154,29 @@ git pull origin main
 
 ## Web Server Configuration
 
+### Automatic Nginx Configuration Update
+
+The `deploy-remote.sh` script can automatically update nginx configuration on the server:
+
+```bash
+# Deploy with nginx update
+./scripts/deploy-remote.sh v1.2.0 production pm2 user@server.com /var/www/bihesewa.com true
+```
+
+**What it does:**
+1. ✅ Looks for nginx config file in project (`bihesewa.com.conf`, `nginx.conf`, or `nginx/bihesewa.com.conf`)
+2. ✅ Backs up existing nginx config on server
+3. ✅ Copies new config to server
+4. ✅ Tests nginx configuration
+5. ✅ Reloads nginx (with confirmation)
+
+**Requirements:**
+- Nginx config file must exist in project root
+- User must have sudo access on server
+- Nginx must be installed on server
+
+**Note:** The script will ask for confirmation before reloading nginx to prevent accidental downtime.
+
 ### Nginx Configuration Example
 
 ```nginx
