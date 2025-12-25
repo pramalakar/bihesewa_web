@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # Remote Deployment Script for bihesewa_web (Next.js) - Run this from your local machine
-# Usage: ./scripts/deploy-remote.sh [version|branch] [environment] [method] [server] [server-path]
+# Usage: ./scripts/deploy-remote.sh [version|branch] [environment] [method] [server] [server-path] [update-nginx]
 # Example: ./scripts/deploy-remote.sh v1.2.0 production pm2 user@server.com /var/www/bihesewa.com
-# Example: ./scripts/deploy-remote.sh v1.2.0 production pm2 user@192.168.1.100 /var/www/bihesewa.com
+# Example: ./scripts/deploy-remote.sh v1.2.0 production pm2 user@server.com /var/www/bihesewa.com true
+# Example: ./scripts/deploy-remote.sh v1.2.0 production pm2 user@192.168.1.100 /var/www/bihesewa.com false
 
 set -e  # Exit on error
 
@@ -12,6 +13,7 @@ ENVIRONMENT=${2:-"production"}
 METHOD=${3:-"pm2"}
 SERVER=${4:-""}
 SERVER_PATH=${5:-"/var/www/bihesewa.com"}
+UPDATE_NGINX=${6:-"false"}
 
 # Colors
 RED='\033[0;31m'
@@ -39,8 +41,9 @@ print_error() {
 # Validate server
 if [ -z "$SERVER" ]; then
     print_error "Server is required for remote deployment"
-    echo "Usage: ./scripts/deploy-remote.sh [version|branch] [environment] [method] [server] [server-path]"
+    echo "Usage: ./scripts/deploy-remote.sh [version|branch] [environment] [method] [server] [server-path] [update-nginx]"
     echo "Example: ./scripts/deploy-remote.sh v1.2.0 production pm2 user@server.com /var/www/bihesewa.com"
+    echo "Example: ./scripts/deploy-remote.sh v1.2.0 production pm2 user@server.com /var/www/bihesewa.com true"
     exit 1
 fi
 
@@ -50,6 +53,7 @@ echo "🌍 Environment: $ENVIRONMENT"
 echo "🚀 Method: $METHOD"
 echo "🖥️  Server: $SERVER"
 echo "📁 Server Path: $SERVER_PATH"
+echo "🌐 Update Nginx: $UPDATE_NGINX"
 echo ""
 
 # Get script directory
@@ -153,6 +157,86 @@ fi
 # Execute deployment on remote server
 print_info "Executing deployment on remote server..."
 ssh "$SERVER" "cd $REPO_DIR && chmod +x scripts/deploy.sh && ./scripts/deploy.sh $VERSION_OR_BRANCH $ENVIRONMENT $METHOD"
+
+# Handle nginx configuration
+if [ "$UPDATE_NGINX" = "true" ] || [ "$UPDATE_NGINX" = "yes" ] || [ "$UPDATE_NGINX" = "1" ]; then
+    print_info "Updating nginx configuration..."
+    
+    # Check if nginx config file exists locally
+    NGINX_CONFIG_FILE=""
+    if [ -f "$PROJECT_DIR/bihesewa.com.conf" ]; then
+        NGINX_CONFIG_FILE="bihesewa.com.conf"
+    elif [ -f "$PROJECT_DIR/nginx.conf" ]; then
+        NGINX_CONFIG_FILE="nginx.conf"
+    elif [ -f "$PROJECT_DIR/nginx/bihesewa.com.conf" ]; then
+        NGINX_CONFIG_FILE="nginx/bihesewa.com.conf"
+    fi
+    
+    if [ -n "$NGINX_CONFIG_FILE" ]; then
+        print_info "Found nginx config: $NGINX_CONFIG_FILE"
+        
+        # Check if nginx is installed on server
+        if ssh "$SERVER" "command -v nginx" &>/dev/null; then
+            # Determine nginx config directory
+            NGINX_SITES_AVAILABLE="/etc/nginx/sites-available"
+            NGINX_SITES_ENABLED="/etc/nginx/sites-enabled"
+            
+            # Check if sites-available exists, otherwise use conf.d
+            if ! ssh "$SERVER" "[ -d $NGINX_SITES_AVAILABLE ]" &>/dev/null; then
+                NGINX_SITES_AVAILABLE="/etc/nginx/conf.d"
+                NGINX_SITES_ENABLED="/etc/nginx/conf.d"
+            fi
+            
+            # Backup existing config
+            CONFIG_NAME="bihesewa.com"
+            print_info "Backing up existing nginx config..."
+            ssh "$SERVER" "sudo cp $NGINX_SITES_AVAILABLE/$CONFIG_NAME.conf $NGINX_SITES_AVAILABLE/$CONFIG_NAME.conf.backup.\$(date +%Y%m%d_%H%M%S) 2>/dev/null || true"
+            
+            # Copy new config to server
+            print_info "Copying nginx config to server..."
+            scp "$PROJECT_DIR/$NGINX_CONFIG_FILE" "$SERVER:/tmp/$CONFIG_NAME.conf"
+            
+            # Move to nginx directory (requires sudo)
+            print_info "Installing nginx config..."
+            ssh "$SERVER" "sudo mv /tmp/$CONFIG_NAME.conf $NGINX_SITES_AVAILABLE/$CONFIG_NAME.conf"
+            
+            # Create symlink if using sites-available/sites-enabled
+            if [ "$NGINX_SITES_AVAILABLE" != "$NGINX_SITES_ENABLED" ]; then
+                print_info "Enabling nginx site..."
+                ssh "$SERVER" "sudo ln -sf $NGINX_SITES_AVAILABLE/$CONFIG_NAME.conf $NGINX_SITES_ENABLED/$CONFIG_NAME.conf"
+            fi
+            
+            # Test nginx configuration
+            print_info "Testing nginx configuration..."
+            if ssh "$SERVER" "sudo nginx -t" &>/dev/null; then
+                print_success "Nginx configuration is valid"
+                
+                # Ask for confirmation before reloading
+                read -p "Reload nginx to apply changes? (y/n) " -n 1 -r
+                echo
+                if [[ $REPLY =~ ^[Yy]$ ]]; then
+                    print_info "Reloading nginx..."
+                    ssh "$SERVER" "sudo systemctl reload nginx || sudo service nginx reload"
+                    print_success "Nginx reloaded successfully"
+                else
+                    print_warning "Nginx configuration updated but not reloaded"
+                    print_info "Reload manually: ssh $SERVER 'sudo systemctl reload nginx'"
+                fi
+            else
+                print_error "Nginx configuration test failed!"
+                print_warning "Configuration not applied. Please check manually."
+                print_info "Test manually: ssh $SERVER 'sudo nginx -t'"
+            fi
+        else
+            print_warning "Nginx is not installed on server. Skipping nginx configuration."
+        fi
+    else
+        print_warning "Nginx config file not found in project. Skipping nginx update."
+        print_info "Expected files: bihesewa.com.conf, nginx.conf, or nginx/bihesewa.com.conf"
+    fi
+else
+    print_info "Skipping nginx configuration update (set 6th parameter to 'true' to update)"
+fi
 
 print_success "Remote deployment completed!"
 print_info "Application deployed to: $SERVER:$SERVER_PATH"

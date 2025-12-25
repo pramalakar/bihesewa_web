@@ -67,15 +67,21 @@ When you run `npm run build`:
 **Use:** `deploy-remote.sh`
 
 **What it does:**
-1. ✅ Checks out version/branch locally
+1. ✅ Checks out version/branch on server
 2. ✅ Builds the app **on the server** (ensures correct environment)
 3. ✅ Installs dependencies on server
 4. ✅ Restarts PM2 application
-5. ✅ **One command does everything**
+5. ✅ Optionally updates nginx configuration (if enabled)
+6. ✅ **One command does everything**
 
 **Command:**
 ```bash
 ./scripts/deploy-remote.sh v1.2.0 production pm2 user@server.com /var/www/bihesewa.com
+```
+
+**With Nginx Update:**
+```bash
+./scripts/deploy-remote.sh v1.2.0 production pm2 user@server.com /var/www/bihesewa.com true
 ```
 
 **Parameters:**
@@ -84,11 +90,15 @@ When you run `npm run build`:
 - `pm2` - Method (pm2/manual)
 - `user@server.com` - SSH server address
 - `/var/www/bihesewa.com` - Server deployment path
+- `true` (optional) - Update nginx configuration (default: false)
 
 **Example:**
 ```bash
 # Deploy version 1.2.0 to production
 ./scripts/deploy-remote.sh v1.2.0 production pm2 admin@bihesewa.com /var/www/bihesewa.com
+
+# Deploy with nginx configuration update
+./scripts/deploy-remote.sh v1.2.0 production pm2 admin@bihesewa.com /var/www/bihesewa.com true
 
 # Deploy main branch to staging
 ./scripts/deploy-remote.sh main staging pm2 admin@staging.bihesewa.com /var/www/staging
